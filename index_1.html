@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>遙距 IT 支援 — 伺服器 · 網絡 · 即時解決</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans+HK:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070B12;
+    --panel:#101927;
+    --panel-2:#0C1420;
+    --line:#1D2A3D;
+    --text:#E7EEF5;
+    --muted:#8CA0B3;
+    --mint:#33E7A8;
+    --mint-dim:rgba(51,231,168,.12);
+    --coral:#FF6B4A;
+    --coral-dim:rgba(255,107,74,.14);
+    --amber:#FFC24B;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans HK','PingFang HK','Microsoft JhengHei',sans-serif;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  h1,h2,h3,.display{font-family:'Space Grotesk','IBM Plex Sans HK',sans-serif;}
+  a{color:inherit; text-decoration:none;}
+  img,svg{display:block; max-width:100%;}
+  .wrap{max-width:1120px; margin:0 auto; padding:0 24px;}
+
+  /* background grid texture */
+  .grid-bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(51,231,168,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(51,231,168,.05) 1px, transparent 1px);
+    background-size:56px 56px;
+    -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 90%);
+            mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 90%);
+  }
+
+  /* NAV */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(7,11,18,.82); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 24px; max-width:1120px; margin:0 auto;
+  }
+  .logo{display:flex; align-items:center; gap:10px; font-weight:700; font-size:18px; letter-spacing:.02em;}
+  .logo .dot{width:9px; height:9px; border-radius:50%; background:var(--mint); box-shadow:0 0 12px var(--mint); animation:pulse 2s infinite;}
+  nav .links{display:flex; gap:32px; font-size:14px; color:var(--muted);}
+  nav .links a:hover{color:var(--text);}
+  .nav-cta{
+    display:flex; align-items:center; gap:8px;
+    background:var(--mint); color:#06130D; font-weight:600; font-size:14px;
+    padding:9px 16px; border-radius:8px;
+  }
+  .nav-cta:hover{filter:brightness(1.08);}
+  @media (max-width:760px){ nav .links{display:none;} }
+
+  /* HERO */
+  .hero{position:relative; z-index:1; padding:90px 0 70px;}
+  .hero-grid{display:grid; grid-template-columns:1.1fr .9fr; gap:56px; align-items:center;}
+  @media (max-width:900px){ .hero-grid{grid-template-columns:1fr;} }
+
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--mint);
+    border:1px solid rgba(51,231,168,.35); background:var(--mint-dim);
+    padding:6px 12px; border-radius:999px; margin-bottom:22px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--mint); animation:pulse 1.6s infinite;}
+
+  .hero h1{
+    font-size:clamp(34px, 5vw, 56px); font-weight:700; letter-spacing:-.02em;
+    line-height:1.15; margin-bottom:22px;
+  }
+  .hero h1 .accent{color:var(--mint);}
+  .hero p.lead{color:var(--muted); font-size:17px; max-width:480px; margin-bottom:32px;}
+
+  .cta-row{display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
+  .btn-primary{
+    display:inline-flex; align-items:center; gap:10px;
+    background:var(--mint); color:#06130D; font-weight:700; font-size:15px;
+    padding:15px 26px; border-radius:10px;
+    box-shadow:0 0 0 0 rgba(51,231,168,.5);
+    transition:transform .15s ease, box-shadow .3s ease;
+  }
+  .btn-primary:hover{transform:translateY(-2px); box-shadow:0 8px 30px -6px rgba(51,231,168,.5);}
+  .btn-ghost{
+    color:var(--text); font-size:14px; border-bottom:1px solid var(--line); padding-bottom:2px;
+  }
+  .btn-ghost:hover{border-color:var(--mint); color:var(--mint);}
+
+  /* Terminal / status panel (signature element) */
+  .term{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    overflow:hidden; box-shadow:0 30px 80px -30px rgba(0,0,0,.6);
+  }
+  .term-bar{
+    display:flex; align-items:center; gap:8px;
+    padding:12px 16px; border-bottom:1px solid var(--line); background:var(--panel-2);
+  }
+  .term-bar span{width:10px; height:10px; border-radius:50%; background:#2A3648;}
+  .term-bar .label{margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--muted);}
+  .term-body{padding:20px; font-family:'JetBrains Mono',monospace; font-size:13px;}
+  .term-line{display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px dashed var(--line);}
+  .term-line:last-child{border-bottom:none;}
+  .term-line .label{color:var(--muted);}
+  .status-ok{color:var(--mint); display:flex; align-items:center; gap:6px;}
+  .status-ok::before{content:''; width:7px; height:7px; border-radius:50%; background:var(--mint); box-shadow:0 0 8px var(--mint); animation:pulse 2s infinite;}
+  .term-graph{display:flex; align-items:flex-end; gap:3px; height:44px; margin:14px 0;}
+  .term-graph i{flex:1; background:linear-gradient(180deg, var(--mint), rgba(51,231,168,.15)); border-radius:2px 2px 0 0; opacity:.85;}
+
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.35;}}
+
+  /* SECTION generic */
+  section{position:relative; z-index:1; padding:88px 0;}
+  .section-head{max-width:640px; margin-bottom:56px;}
+  .kicker{font-family:'JetBrains Mono',monospace; font-size:12.5px; color:var(--mint); letter-spacing:.08em; text-transform:uppercase; margin-bottom:14px; display:block;}
+  .section-head h2{font-size:clamp(26px,3.4vw,38px); font-weight:700; letter-spacing:-.01em; margin-bottom:14px;}
+  .section-head p{color:var(--muted); font-size:16px;}
+
+  /* SERVICES */
+  .services{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  @media (max-width:860px){.services{grid-template-columns:1fr 1fr;}}
+  @media (max-width:560px){.services{grid-template-columns:1fr;}}
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:26px;
+    transition:border-color .2s ease, transform .2s ease;
+  }
+  .card:hover{border-color:rgba(51,231,168,.4); transform:translateY(-3px);}
+  .card .icon{width:44px; height:44px; margin-bottom:18px;}
+  .card h3{font-size:17px; font-weight:600; margin-bottom:8px;}
+  .card p{color:var(--muted); font-size:14.5px;}
+
+  /* PROCESS */
+  .process{display:grid; grid-template-columns:repeat(4,1fr); gap:0;}
+  @media (max-width:860px){.process{grid-template-columns:1fr 1fr;}}
+  @media (max-width:560px){.process{grid-template-columns:1fr;}}
+  .step{position:relative; padding:0 20px 20px 0;}
+  .step .num{font-family:'JetBrains Mono',monospace; color:var(--mint); font-size:13px; margin-bottom:14px; display:block;}
+  .step h3{font-size:16px; font-weight:600; margin-bottom:8px;}
+  .step p{color:var(--muted); font-size:14px;}
+  .step::after{
+    content:''; position:absolute; top:9px; right:0; width:calc(100% - 20px); height:1px;
+    background:linear-gradient(90deg, var(--line), transparent);
+  }
+  .step:last-child::after, .step:nth-child(4n)::after{display:none;}
+  @media (max-width:860px){ .step:nth-child(2n)::after{display:none;} }
+  @media (max-width:560px){ .step::after{display:none;} }
+
+  /* STATS */
+  .stats-bar{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+    background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden;
+  }
+  @media (max-width:700px){.stats-bar{grid-template-columns:1fr 1fr;}}
+  .stat{background:var(--panel); padding:30px 24px; text-align:center;}
+  .stat .num{font-family:'JetBrains Mono',monospace; font-size:30px; font-weight:600; color:var(--mint);}
+  .stat .lbl{font-size:13px; color:var(--muted); margin-top:6px;}
+
+  /* CTA / FOOTER */
+  .cta-section{
+    text-align:center; background:radial-gradient(ellipse at 50% 0%, rgba(51,231,168,.08), transparent 60%);
+  }
+  .cta-section h2{font-size:clamp(26px,4vw,42px); margin-bottom:16px;}
+  .cta-section p{color:var(--muted); max-width:520px; margin:0 auto 36px;}
+
+  .wa-inline{
+    display:inline-flex; align-items:center; gap:12px;
+    background:var(--panel); border:1px solid var(--line); padding:16px 24px; border-radius:12px;
+    font-family:'JetBrains Mono',monospace; font-size:15px;
+  }
+  .wa-inline .num{color:var(--mint); font-weight:600;}
+
+  footer{border-top:1px solid var(--line); padding:36px 0; color:var(--muted); font-size:13px;}
+  footer .wrap{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;}
+
+  /* Floating WhatsApp button */
+  .wa-float{
+    position:fixed; right:22px; bottom:22px; z-index:100;
+    width:60px; height:60px; border-radius:50%;
+    background:#25D366; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 10px 30px -6px rgba(37,211,102,.6);
+    animation:floatPulse 2.6s infinite;
+  }
+  .wa-float svg{width:30px; height:30px;}
+  @keyframes floatPulse{
+    0%{box-shadow:0 0 0 0 rgba(37,211,102,.55);}
+    70%{box-shadow:0 0 0 16px rgba(37,211,102,0);}
+    100%{box-shadow:0 0 0 0 rgba(37,211,102,0);}
+  }
+  .wa-tooltip{
+    position:fixed; right:92px; bottom:38px; z-index:100;
+    background:var(--panel); border:1px solid var(--line); padding:8px 14px; border-radius:8px;
+    font-size:13px; color:var(--text); white-space:nowrap; opacity:0; pointer-events:none;
+    transition:opacity .2s ease;
+  }
+  .wa-float:hover + .wa-tooltip{opacity:1;}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<header>
+  <nav>
+    <div class="logo"><span class="dot"></span>遙距IT支援</div>
+    <div class="links">
+      <a href="#services">服務範圍</a>
+      <a href="#process">支援流程</a>
+      <a href="#stats">實績</a>
+    </div>
+    <a class="nav-cta" href="https://wa.me/85251873788" target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2Zm0 18.1a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.13.82.84-3.05-.2-.31a8.2 8.2 0 0 1-1.26-4.32c0-4.54 3.7-8.24 8.25-8.24 4.54 0 8.24 3.7 8.24 8.24 0 4.55-3.7 8.19-8.25 8.19Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.23-1.46-1.37-1.71-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.15.16-.25.25-.41.08-.17.04-.31-.02-.44-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43-.14-.01-.31-.01-.47-.01-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.08 0 1.22.89 2.41 1.01 2.57.12.17 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.08.15-1.18-.06-.1-.23-.16-.48-.28Z"/></svg>
+      WhatsApp 查詢
+    </a>
+  </nav>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow"><span class="dot"></span>WhatsApp 即時接單</span>
+        <h1>伺服器當機、網絡斷線？<br><span class="accent">WhatsApp 一句</span>，即刻遙距處理</h1>
+        <p class="lead">專注企業 IT 遙距支援 — 伺服器維護、網絡故障排查、資料備份與保安設定。毋須等技術員上門，遠端連線即可診斷同解決。</p>
+        <div class="cta-row">
+          <a class="btn-primary" href="https://wa.me/85251873788" target="_blank" rel="noopener">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2Zm0 18.1a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.13.82.84-3.05-.2-.31a8.2 8.2 0 0 1-1.26-4.32c0-4.54 3.7-8.24 8.25-8.24 4.54 0 8.24 3.7 8.24 8.24 0 4.55-3.7 8.19-8.25 8.19Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.23-1.46-1.37-1.71-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.15.16-.25.25-.41.08-.17.04-.31-.02-.44-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43-.14-.01-.31-.01-.47-.01-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.08 0 1.22.89 2.41 1.01 2.57.12.17 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.08.15-1.18-.06-.1-.23-.16-.48-.28Z"/></svg>
+            即刻 WhatsApp 我哋
+          </a>
+          <a class="btn-ghost" href="#services">睇下我哋做啲乜 ↓</a>
+        </div>
+      </div>
+
+      <div class="term">
+        <div class="term-bar">
+          <span></span><span></span><span></span>
+          <span class="label">remote-session // status</span>
+        </div>
+        <div class="term-body">
+          <div class="term-line"><span class="label">連線目標</span><span>SRV-HK-PROD-01</span></div>
+          <div class="term-line"><span class="label">連線狀態</span><span class="status-ok">已連線</span></div>
+          <div class="term-line"><span class="label">延遲</span><span>12 ms</span></div>
+          <div class="term-graph" id="termGraph"></div>
+          <div class="term-line"><span class="label">網絡負載</span><span class="status-ok">正常</span></div>
+          <div class="term-line"><span class="label">回應時間</span><span>&lt; 15 分鐘</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">服務範圍</span>
+        <h2>由伺服器到終端裝置，一手包辦</h2>
+        <p>無論係機房伺服器定係辦公室電腦，我哋都可以透過遙距連線第一時間介入處理。</p>
+      </div>
+      <div class="services">
+
+        <div class="card">
+          <svg class="icon" viewBox="0 0 48 48" fill="none">
+            <rect x="8" y="6" width="32" height="10" rx="2" stroke="#33E7A8" stroke-width="2"/>
+            <rect x="8" y="19" width="32" height="10" rx="2" stroke="#33E7A8" stroke-width="2"/>
+            <rect x="8" y="32" width="32" height="10" rx="2" stroke="#33E7A8" stroke-width="2"/>
+            <circle cx="14" cy="11" r="1.6" fill="#33E7A8"/>
+            <circle cx="14" cy="24" r="1.6" fill="#33E7A8"/>
+            <circle cx="14" cy="37" r="1.6" fill="#33E7A8"/>
+          </svg>
+          <h3>伺服器維護</h3>
+          <p>Windows / Linux 伺服器監控、更新、效能調校同緊急救援，減少當機時間。</p>
+        </div>
+
+        <div class="card">
+          <svg class="icon" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="14" r="4" stroke="#33E7A8" stroke-width="2"/>
+            <circle cx="10" cy="36" r="4" stroke="#33E7A8" stroke-width="2"/>
+            <circle cx="38" cy="36" r="4" stroke="#33E7A8" stroke-width="2"/>
+            <path d="M24 18v8m0 0-10 6m10-6 10 6" stroke="#33E7A8" stroke-width="2"/>
+          </svg>
+          <h3>網絡故障排查</h3>
+          <p>Wi-Fi 訊號差、斷網、VPN 連唔到公司系統，遙距檢查路由器同網絡設定，快速定位問題。</p>
+        </div>
+
+        <div class="card">
+          <svg class="icon" viewBox="0 0 48 48" fill="none">
+            <path d="M24 6 8 12v10c0 10 7 17 16 20 9-3 16-10 16-20V12L24 6Z" stroke="#33E7A8" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M18 24l4 4 8-8" stroke="#33E7A8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h3>資料備份 & 保安</h3>
+          <p>定期備份策略、防毒防勒索軟件設定，同埋帳戶權限審查，減低資料外洩風險。</p>
+        </div>
+
+        <div class="card">
+          <svg class="icon" viewBox="0 0 48 48" fill="none">
+            <rect x="6" y="9" width="36" height="24" rx="2" stroke="#33E7A8" stroke-width="2"/>
+            <path d="M18 42h12M24 33v9" stroke="#33E7A8" stroke-width="2"/>
+            <path d="M15 21l5 5 9-10" stroke="#33E7A8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h3>遙距桌面支援</h3>
+          <p>電腦慢、軟件出錯、印表機連唔到，直接遙距接管畫面即場示範修復。</p>
+        </div>
+
+        <div class="card">
+          <svg class="icon" viewBox="0 0 48 48" fill="none">
+            <path d="M24 4v6M24 38v6M4 24h6M38 24h6" stroke="#33E7A8" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="24" cy="24" r="10" stroke="#33E7A8" stroke-width="2"/>
+            <circle cx="24" cy="24" r="3" fill="#33E7A8"/>
+          </svg>
+          <h3>系統健康檢查</h3>
+          <p>定期為公司網絡同伺服器做體檢報告，喺出事之前搵出隱患。</p>
+        </div>
+
+        <div class="card">
+          <svg class="icon" viewBox="0 0 48 48" fill="none">
+            <path d="M8 34c4-14 12-20 16-20s12 6 16 20" stroke="#33E7A8" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="24" cy="14" r="4" stroke="#33E7A8" stroke-width="2"/>
+            <path d="M8 40h32" stroke="#33E7A8" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <h3>雲端遷移 & 設定</h3>
+          <p>協助公司搬上雲端郵件同儲存系統，設定同步同權限管理。</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section id="process">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">支援流程</span>
+        <h2>四步搞掂，唔使等上門</h2>
+      </div>
+      <div class="process">
+        <div class="step">
+          <span class="num">01</span>
+          <h3>WhatsApp 聯絡</h3>
+          <p>send 個問題畀我哋，簡單講下情況同緊急程度。</p>
+        </div>
+        <div class="step">
+          <span class="num">02</span>
+          <h3>遙距診斷</h3>
+          <p>技術員遠端連線你部機或伺服器，即時檢查問題根源。</p>
+        </div>
+        <div class="step">
+          <span class="num">03</span>
+          <h3>即場修復</h3>
+          <p>大部分問題可以喺通話期間直接解決,毋須等候。</p>
+        </div>
+        <div class="step">
+          <span class="num">04</span>
+          <h3>跟進確認</h3>
+          <p>修復後再次確認系統穩定，並提供預防建議。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section id="stats">
+    <div class="wrap">
+      <div class="stats-bar">
+        <div class="stat"><div class="num mono">&lt;15分</div><div class="lbl">平均回應時間</div></div>
+        <div class="stat"><div class="num mono">6項</div><div class="lbl">專業服務範圍</div></div>
+        <div class="stat"><div class="num mono">99%</div><div class="lbl">遙距即場解決率</div></div>
+        <div class="stat"><div class="num mono">100+</div><div class="lbl">企業客戶信賴</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="wrap">
+      <h2>而家部機/伺服器有問題?</h2>
+      <p>直接 WhatsApp 我哋,描述返情況,技術員會盡快遙距接手處理。</p>
+      <a class="wa-inline" href="https://wa.me/85251873788" target="_blank" rel="noopener">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#25D366"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2Zm0 18.1a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.13.82.84-3.05-.2-.31a8.2 8.2 0 0 1-1.26-4.32c0-4.54 3.7-8.24 8.25-8.24 4.54 0 8.24 3.7 8.24 8.24 0 4.55-3.7 8.19-8.25 8.19Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.23-1.46-1.37-1.71-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.15.16-.25.25-.41.08-.17.04-.31-.02-.44-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43-.14-.01-.31-.01-.47-.01-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.08 0 1.22.89 2.41 1.01 2.57.12.17 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.08.15-1.18-.06-.1-.23-.16-.48-.28Z"/></svg>
+        <span class="num">立即 WhatsApp 我哋</span>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>© 2026 遙距IT支援. 服務香港中小企.</div>
+    <div>伺服器 · 網絡 · 資料保安 · 遙距桌面</div>
+  </div>
+</footer>
+
+<a class="wa-float" href="https://wa.me/85251873788" target="_blank" rel="noopener" aria-label="WhatsApp 聯絡我們">
+  <svg viewBox="0 0 24 24" fill="#fff"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2Zm0 18.1a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.13.82.84-3.05-.2-.31a8.2 8.2 0 0 1-1.26-4.32c0-4.54 3.7-8.24 8.25-8.24 4.54 0 8.24 3.7 8.24 8.24 0 4.55-3.7 8.19-8.25 8.19Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.23-1.46-1.37-1.71-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.15.16-.25.25-.41.08-.17.04-.31-.02-.44-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43-.14-.01-.31-.01-.47-.01-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.08 0 1.22.89 2.41 1.01 2.57.12.17 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.08.15-1.18-.06-.1-.23-.16-.48-.28Z"/></svg>
+</a>
+<div class="wa-tooltip">WhatsApp 我哋</div>
+
+<script>
+  // random-ish bar heights for the terminal "network load" graph
+  const graph = document.getElementById('termGraph');
+  const bars = 28;
+  for (let i = 0; i < bars; i++) {
+    const bar = document.createElement('i');
+    const h = 18 + Math.round(Math.sin(i * 0.7) * 10 + Math.random() * 14);
+    bar.style.height = Math.max(8, h) + 'px';
+    graph.appendChild(bar);
+  }
+</script>
+
+</body>
+</html>
